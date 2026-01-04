@@ -48,11 +48,13 @@ export class BatchView {
       </div>
       <div class="batch-footer">
         <div class="batch-options">
-           <label>
-             <input type="checkbox" id="chk-merge-pdf"> Merge into single PDF
+           <label class="checkbox-wrapper">
+             <input type="checkbox" id="chk-merge-pdf">
+             <span class="custom-checkbox"></span>
+             <span class="label-text">Merge into single PDF</span>
            </label>
         </div>
-        <button id="btn-process-batch" class="primary-btn" ${this.selectedNoteIds.size === 0 ? 'disabled' : ''}>
+        <button id="btn-process-batch" class="btn btn-primary" ${this.selectedNoteIds.size === 0 ? 'disabled' : ''}>
           Generate PDFs (${this.selectedNoteIds.size})
         </button>
       </div>
@@ -119,8 +121,31 @@ export class BatchView {
         } else {
             this.selectedNoteIds.add(id);
         }
-        this.render(); // Re-render to update UI state
+
+        // Update only the specific card instead of re-rendering (preserves scroll position)
+        const card = this.container.querySelector(`.note-card[data-id="${id}"]`);
+        if (card) {
+            const checkbox = card.querySelector('.checkbox');
+            if (this.selectedNoteIds.has(id)) {
+                card.classList.add('selected');
+                checkbox?.classList.add('checked');
+            } else {
+                card.classList.remove('selected');
+                checkbox?.classList.remove('checked');
+            }
+        }
+
+        // Update button state
+        this.updateFooterButton();
         this.onSelectionChange(this.selectedNoteIds.size);
+    }
+
+    private updateFooterButton() {
+        const btn = this.container.querySelector('#btn-process-batch') as HTMLButtonElement;
+        if (btn) {
+            btn.disabled = this.selectedNoteIds.size === 0;
+            btn.textContent = `Generate PDFs (${this.selectedNoteIds.size})`;
+        }
     }
 
     private bindGlobalEvents() {

@@ -5,7 +5,7 @@ export interface BatchProgress {
     current: number;
     succeeded: number;
     failed: number;
-    results: Array<{ noteId: string; status: 'success' | 'error'; error?: string; pdfBase64?: string; filename?: string }>;
+    results: Array<{ noteId: string; status: 'success' | 'error'; error?: string; pdfBase64?: string; filename?: string; sizeBytes?: number }>;
 }
 
 export type ProgressCallback = (progress: BatchProgress) => void;
@@ -17,7 +17,7 @@ export class BatchManager {
     async processBatch(
         notes: Array<{ noteId: string; noteUrl: string }>,
         onProgress: ProgressCallback
-    ): Promise<Array<{ noteId: string; pdfBase64: string; filename: string }>> {
+    ): Promise<Array<{ noteId: string; pdfBase64: string; filename: string; sizeBytes: number }>> {
         if (this.isRunning) return [];
         this.isRunning = true;
         this.shouldStop = false;
@@ -103,7 +103,8 @@ export class BatchManager {
                     noteId: note.noteId,
                     status: 'success',
                     pdfBase64: stats.pdfBase64,
-                    filename: stats.filename
+                    filename: stats.filename,
+                    sizeBytes: stats.sizeBytes
                 });
 
             } catch (err: any) {
@@ -120,7 +121,7 @@ export class BatchManager {
 
         return progress.results
             .filter(r => r.status === 'success' && r.pdfBase64)
-            .map(r => ({ noteId: r.noteId, pdfBase64: r.pdfBase64!, filename: r.filename! }));
+            .map(r => ({ noteId: r.noteId, pdfBase64: r.pdfBase64!, filename: r.filename!, sizeBytes: r.sizeBytes! }));
     }
 
     async mergePdfs(pdfDataList: Array<{ pdfBase64: string }>): Promise<string> {

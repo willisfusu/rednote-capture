@@ -23,6 +23,7 @@ interface UIState {
   isLoading: boolean;
   error: string | null;
   detectedNotes: DetectedNote[];
+  showBatchResults: boolean; // Track if batch results should be shown
 }
 
 let state: UIState = {
@@ -36,6 +37,7 @@ let state: UIState = {
   isLoading: false,
   error: null,
   detectedNotes: [],
+  showBatchResults: false,
 };
 
 // DOM Elements
@@ -44,6 +46,7 @@ const elements = {
   notRedNote: document.getElementById('not-rednote')!,
   captureSection: document.getElementById('capture-section')!,
   batchSection: document.getElementById('batch-section')!,
+  batchResultsSection: document.getElementById('batch-results-section')!,
   previewSection: document.getElementById('preview-section')!,
   pdfSection: document.getElementById('pdf-section')!,
   successSection: document.getElementById('success-section')!,
@@ -136,6 +139,7 @@ function updateUI(): void {
     elements.notRedNote,
     elements.captureSection,
     elements.batchSection,
+    elements.batchResultsSection,
     elements.previewSection,
     elements.pdfSection,
     elements.successSection,
@@ -193,6 +197,12 @@ function updateUI(): void {
     return;
   }
 
+  // Batch Results View
+  if (state.showBatchResults) {
+    elements.batchResultsSection.classList.remove('hidden');
+    return;
+  }
+
   // Profile Batch View
   if (state.isOnProfile) {
     elements.batchSection.classList.remove('hidden');
@@ -214,10 +224,24 @@ function formatBytes(bytes: number): string {
 /**
  * Set loading state
  */
-function setLoading(loading: boolean, message = 'Processing...'): void {
+/**
+ * Set loading state
+ */
+function setLoading(loading: boolean, message = 'Processing...', progress?: number): void {
   state.isLoading = loading;
   state.error = null;
   elements.loadingMessage.textContent = message;
+
+  const progressBar = document.getElementById('progress-bar') as HTMLElement;
+  if (progressBar) {
+    if (!loading) {
+      // Always reset progress bar when loading is turned off
+      progressBar.style.width = '0%';
+    } else if (progress !== undefined) {
+      progressBar.style.width = `${Math.max(5, progress)}%`; // Min 5% so icon shows
+    }
+  }
+
   updateUI();
 }
 
@@ -438,16 +462,15 @@ async function init(): Promise<void> {
       // Run Batch
       const results = await batchManager.processBatch(notesToProcess, props => {
         const pct = Math.round((props.current / props.total) * 100);
-        elements.loadingMessage.textContent = `Processing ${props.current}/${props.total} (${pct}%)`;
+        setLoading(true, `Processing ${props.current}/${props.total}`, pct);
       });
 
       setLoading(true, 'Finalizing...');
 
       // Handle Results
-      const resultsSection = document.getElementById('batch-results-section')!;
       const filesList = document.getElementById('batch-files-list')!;
       const downloadBtn = document.getElementById('btn-batch-download-all')!;
-      const backBtn = document.getElementById('btn-batch-back')!; // Add back button logic if needed
+      const backBtn = document.getElementById('btn-batch-back')!;
 
       filesList.innerHTML = '';
 
@@ -463,24 +486,41 @@ async function init(): Promise<void> {
         });
       };
 
+      const createListItem = (filename: string, meta: string, onDownload: () => void) => {
+        const item = document.createElement('div');
+        item.className = 'batch-file-item';
+        item.innerHTML = `
+            <div class="file-icon-wrapper">
+                <span class="file-icon-text">📄</span>
+            </div>
+            <div class="file-info">
+                <div class="file-name" title="${filename}">${filename}</div>
+                <div class="file-meta">${meta}</div>
+            </div>
+            <button class="action-btn-sm">Save</button>
+          `;
+        item.querySelector('button')?.addEventListener('click', onDownload);
+        return item;
+      };
+
       if (merge) {
         if (results.length > 0) {
-          setLoading(true, 'Merging PDFs...');
+          setLoading(true, 'Merging PDFs...', 90);
           const mergedBase64 = await batchManager.mergePdfs(results);
           const filename = `RedNote_Batch_${new Date().toISOString().slice(0, 10)}.pdf`;
 
-          filesList.innerHTML = `<div class="batch-file-item"><span>${filename}</span> <span>(Merged ${results.length} posts)</span></div>`;
+          setLoading(true, 'Done!', 100);
+
+          filesList.appendChild(createListItem(filename, `Merged ${results.length} posts`, () => downloadBlob(mergedBase64, filename)));
 
           downloadBtn.textContent = 'Download Merged PDF';
           downloadBtn.onclick = () => downloadBlob(mergedBase64, filename);
         }
       } else {
         // List individual files
+        setLoading(true, 'Finalizing...', 100);
         results.forEach(r => {
-          const item = document.createElement('div');
-          item.className = 'batch-file-item';
-          item.innerHTML = `<span>${r.filename}</span>`;
-          filesList.appendChild(item);
+          filesList.appendChild(createListItem(r.filename, formatBytes(r.sizeBytes), () => downloadBlob(r.pdfBase64, r.filename)));
         });
 
         downloadBtn.textContent = `Download All (${results.length})`;
@@ -493,12 +533,12 @@ async function init(): Promise<void> {
       }
 
       setLoading(false);
-      elements.batchSection.classList.add('hidden');
-      resultsSection.classList.remove('hidden');
+      state.showBatchResults = true;
+      updateUI();
 
       backBtn.onclick = () => {
-        resultsSection.classList.add('hidden');
-        elements.batchSection.classList.remove('hidden');
+        state.showBatchResults = false;
+        updateUI();
       };
     };
 

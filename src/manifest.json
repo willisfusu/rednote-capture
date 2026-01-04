@@ -12,7 +12,7 @@
   ],
   "host_permissions": [
     "https://www.xiaohongshu.com/*",
-    "https://sns-img-*.xhscdn.com/*",
+    "https://*.xhscdn.com/*",
     "https://www.googleapis.com/*"
   ],
   "oauth2": {
@@ -43,8 +43,12 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["lib/fonts/*"],
-      "matches": ["https://www.xiaohongshu.com/*"]
+      "resources": [
+        "lib/fonts/*"
+      ],
+      "matches": [
+        "https://www.xiaohongshu.com/*"
+      ]
     }
   ],
   "content_security_policy": {
