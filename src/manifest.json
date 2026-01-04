@@ -1,0 +1,79 @@
+{
+  "manifest_version": 3,
+  "name": "RedNote to NotebookLM",
+  "version": "1.0.0",
+  "description": "Capture RedNote posts and save them to Google NotebookLM as PDF sources",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "identity",
+    "downloads",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://www.xiaohongshu.com/*",
+    "https://sns-img-*.xhscdn.com/*",
+    "https://www.googleapis.com/*"
+  ],
+  "oauth2": {
+    "client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/drive.file"
+    ]
+  },
+  "background": {
+    "service_worker": "background/service-worker.ts",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "RedNote to NotebookLM",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["lib/fonts/*"],
+      "matches": ["https://www.xiaohongshu.com/*"]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+R"
+      },
+      "description": "Open RedNote extension popup"
+    },
+    "capture-post": {
+      "suggested_key": {
+        "default": "Alt+C"
+      },
+      "description": "Capture current RedNote post"
+    },
+    "generate-pdf": {
+      "suggested_key": {
+        "default": "Alt+P"
+      },
+      "description": "Generate PDF from captured post"
+    },
+    "upload-to-drive": {
+      "suggested_key": {
+        "default": "Alt+U"
+      },
+      "description": "Upload PDF to Google Drive"
+    }
+  }
+}

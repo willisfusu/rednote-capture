@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RedNote to NotebookLM</title>
+  <link rel="stylesheet" href="popup.css">
+  <style>
+    /* Batch View Styles */
+    .batch-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .batch-header h2 {
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .batch-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .notes-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .note-card {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+
+    .note-card.selected {
+      border-color: #ff2442;
+    }
+
+    .note-card img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .checkbox {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 20px;
+      height: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+
+    .checkbox.checked {
+      background: #ff2442;
+    }
+
+    .note-info {
+      padding: 4px;
+      font-size: 12px;
+    }
+
+    .note-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .text-btn {
+      background: none;
+      border: none;
+      color: #ff2442;
+      cursor: pointer;
+      padding: 0;
+      font-size: 12px;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 4px;
+    }
+
+    .batch-files-list {
+      max-height: 200px;
+      overflow-y: auto;
+      margin: 10px 0;
+      text-align: left;
+    }
+
+    .batch-file-item {
+      font-size: 12px;
+      padding: 4px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app" class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1 class="title">RedNote Capture</h1>
+      <div id="auth-status" class="auth-status">
+        <span class="status-indicator"></span>
+        <span class="status-text">Not signed in</span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Not on RedNote Message -->
+      <section id="not-rednote" class="section hidden">
+        <p class="message">Navigate to a RedNote post to capture it.</p>
+        <a href="https://www.xiaohongshu.com" target="_blank" class="link">
+          Open RedNote
+        </a>
+      </section>
+
+      <!-- Capture Section -->
+      <section id="capture-section" class="section hidden">
+        <button id="capture-btn" class="btn btn-primary">
+          Capture Post
+        </button>
+        <p class="hint">Click to capture the current post</p>
+      </section>
+
+      <!-- Batch Section -->
+      <section id="batch-section" class="section hidden">
+        <!-- BatchView will render here -->
+      </section>
+
+      <!-- Batch Results Section -->
+      <section id="batch-results-section" class="section hidden">
+        <div class="success-message">
+          <span class="success-icon">✓</span>
+          <p id="batch-complete-msg">Batch Processing Complete!</p>
+        </div>
+        <div id="batch-files-list" class="batch-files-list"></div>
+        <div class="actions">
+          <button id="btn-batch-download-all" class="btn btn-primary">Download</button>
+          <button id="btn-batch-back" class="btn btn-secondary">Back to List</button>
+        </div>
+      </section>
+
+
+      <!-- Preview Section -->
+      <section id="preview-section" class="section hidden">
+        <div class="preview-card">
+          <h3 id="preview-title" class="preview-title"></h3>
+          <p id="preview-author" class="preview-author"></p>
+          <p id="preview-images" class="preview-meta"></p>
+        </div>
+        <div class="actions">
+          <button id="generate-pdf-btn" class="btn btn-primary">
+            Generate PDF
+          </button>
+          <button id="clear-capture-btn" class="btn btn-secondary">
+            Clear
+          </button>
+        </div>
+      </section>
+
+      <!-- PDF Ready Section -->
+      <section id="pdf-section" class="section hidden">
+        <div class="pdf-info">
+          <span class="pdf-icon">PDF</span>
+          <div>
+            <p id="pdf-filename" class="pdf-filename"></p>
+            <p id="pdf-size" class="pdf-size"></p>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="upload-btn" class="btn btn-primary">
+            Upload to Drive
+          </button>
+          <button id="download-btn" class="btn btn-secondary">
+            Download
+          </button>
+        </div>
+      </section>
+
+      <!-- Upload Success Section -->
+      <section id="success-section" class="section hidden">
+        <div class="success-message">
+          <span class="success-icon">✓</span>
+          <p>Uploaded successfully!</p>
+        </div>
+        <a id="drive-link" href="#" target="_blank" class="btn btn-primary">
+          Open in Drive
+        </a>
+        <button id="new-capture-btn" class="btn btn-secondary">
+          Capture Another
+        </button>
+      </section>
+
+      <!-- Loading State -->
+      <section id="loading-section" class="section hidden">
+        <div class="loader"></div>
+        <p id="loading-message" class="loading-text">Processing...</p>
+      </section>
+
+      <!-- Error State -->
+      <section id="error-section" class="section hidden">
+        <p id="error-message" class="error-message"></p>
+        <button id="retry-btn" class="btn btn-secondary">
+          Retry
+        </button>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+    </footer>
+  </div>
+
+  <script type="module" src="popup.ts"></script>
+</body>
+
+</html>
