@@ -27,7 +27,7 @@ export async function loadChineseFont(): Promise<Uint8Array> {
     const arrayBuffer = await response.arrayBuffer();
     cachedChineseFontBytes = new Uint8Array(arrayBuffer);
 
-    console.log('[FontLoader] SmileySans Chinese font loaded successfully');
+
     return cachedChineseFontBytes;
   } catch (error) {
     console.error('[FontLoader] Error loading Chinese font:', error);
@@ -56,7 +56,7 @@ export async function loadEmojiFont(): Promise<Uint8Array> {
     const arrayBuffer = await response.arrayBuffer();
     cachedEmojiFontBytes = new Uint8Array(arrayBuffer);
 
-    console.log('[FontLoader] Noto Emoji font loaded successfully');
+
     return cachedEmojiFontBytes;
   } catch (error) {
     console.error('[FontLoader] Error loading emoji font:', error);

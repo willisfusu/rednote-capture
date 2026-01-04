@@ -41,7 +41,7 @@ export async function handleDownloadPdf(
       saveAs: true,
     });
 
-    console.log('[DownloadPdf] Download started:', downloadId);
+
 
     return {
       success: true,

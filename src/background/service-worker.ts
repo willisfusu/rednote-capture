@@ -66,16 +66,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // Extension install/update handler
 chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === 'install') {
-    console.log('[ServiceWorker] Extension installed');
+
     await initializeStorage();
   } else if (details.reason === 'update') {
-    console.log('[ServiceWorker] Extension updated to version', chrome.runtime.getManifest().version);
+
   }
 });
 
 // Extension startup handler
 chrome.runtime.onStartup.addListener(() => {
-  console.log('[ServiceWorker] Extension started');
+
 });
 
 /**
@@ -109,6 +109,6 @@ async function initializeStorage(): Promise<void> {
       postQueue: [],
     });
 
-    console.log('[ServiceWorker] Storage initialized with defaults');
+
   }
 }

@@ -33,7 +33,7 @@ export async function handleCapturePost(
       currentPdf: null,
     });
 
-    console.log('[CapturePost] Post captured and stored:', capturedPost.id);
+
 
     return {
       success: true,

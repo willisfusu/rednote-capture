@@ -15,14 +15,14 @@ import type { GeneratedPdf } from '../models/generated-pdf';
  */
 export function initializeShortcuts(): void {
   chrome.commands.onCommand.addListener(handleCommand);
-  console.log('[Shortcuts] Keyboard shortcuts initialized');
+
 }
 
 /**
  * Handle keyboard command
  */
 async function handleCommand(command: string, tab?: chrome.tabs.Tab): Promise<void> {
-  console.log(`[Shortcuts] Command received: ${command}`, tab?.id);
+
 
   if (!tab?.id) {
     console.warn('[Shortcuts] No active tab');
@@ -41,7 +41,7 @@ async function handleCommand(command: string, tab?: chrome.tabs.Tab): Promise<vo
         await handleUploadCommand();
         break;
       default:
-        console.log(`[Shortcuts] Unknown command: ${command}`);
+
     }
   } catch (error) {
     console.error(`[Shortcuts] Error handling command ${command}:`, error);
@@ -138,7 +138,7 @@ function showNotification(title: string, message: string): void {
   });
 
   // Log for debugging
-  console.log(`[Shortcuts] Notification: ${title} - ${message}`);
+
 }
 
 /**

@@ -59,7 +59,7 @@ export async function downloadImage(
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), opts.timeout);
 
-      console.log(`[ImageDownloader] Downloading: ${image.url}`);
+
 
       const response = await fetch(image.url, {
         signal: controller.signal,
@@ -79,16 +79,16 @@ export async function downloadImage(
       let bytes = new Uint8Array(arrayBuffer);
       let type = detectImageType(bytes);
 
-      console.log(`[ImageDownloader] Downloaded ${bytes.length} bytes, type: ${type}`);
+
 
       // Convert WebP to JPEG for PDF compatibility
       if (type === 'webp' && opts.convertWebP) {
-        console.log('[ImageDownloader] Converting WebP to JPEG...');
+
         const converted = await convertWebPToJpeg(bytes);
         if (converted) {
           bytes = converted as Uint8Array<ArrayBuffer>;
           type = 'jpeg';
-          console.log(`[ImageDownloader] Converted to JPEG: ${bytes.length} bytes`);
+
         } else {
           console.warn('[ImageDownloader] WebP conversion failed');
         }
@@ -137,14 +137,13 @@ export async function downloadImages(
   images: PostImage[],
   options: Partial<DownloadOptions> = {}
 ): Promise<DownloadedImage[]> {
-  console.log(`[ImageDownloader] Downloading ${images.length} images`);
+
 
   const results = await Promise.all(
     images.map((image) => downloadImage(image, options))
   );
 
-  const successCount = results.filter((r) => r.success).length;
-  console.log(`[ImageDownloader] Downloaded ${successCount}/${images.length} images successfully`);
+
 
   return results;
 }

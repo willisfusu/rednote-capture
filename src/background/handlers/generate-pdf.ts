@@ -3,16 +3,16 @@
  * Generates a PDF from the currently captured post
  */
 
-console.log('[GeneratePdf] Module loading...');
+
 
 import type { Response } from '../../types/messages';
 import type { GeneratedPdf } from '../../models/generated-pdf';
 import type { CapturedPost } from '../../models/captured-post';
 import { ErrorCode, createErrorResponse } from '../../types/errors';
 
-console.log('[GeneratePdf] About to import pdf-generator...');
+
 import { generatePdf } from '../../services/pdf-generator';
-console.log('[GeneratePdf] pdf-generator imported successfully');
+
 
 // In-memory cache for PDF data (session storage has quota limits)
 let cachedPdf: GeneratedPdf | null = null;
@@ -50,7 +50,7 @@ export async function handleGeneratePdf(
       cachedPdf.capturedPostId === typedPayload?.capturedPostId &&
       !typedPayload?.forceRegenerate
     ) {
-      console.log('[GeneratePdf] Returning cached PDF');
+
       return {
         success: true,
         data: cachedPdf,
@@ -94,9 +94,9 @@ export async function handleGeneratePdf(
     };
 
     // Generate PDF
-    console.log('[GeneratePdf] Calling generatePdf function...');
+
     const generatedPdf = await generatePdf(capturedPost, pdfOptions);
-    console.log('[GeneratePdf] generatePdf returned successfully');
+
 
     // Cache PDF in memory (not session storage - too large)
     cachedPdf = generatedPdf;
@@ -116,7 +116,7 @@ export async function handleGeneratePdf(
       },
     });
 
-    console.log('[GeneratePdf] PDF generated successfully:', generatedPdf.filename);
+
 
     return {
       success: true,

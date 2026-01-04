@@ -13,7 +13,6 @@ import { downloadImages, type DownloadedImage } from './image-downloader';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 
-console.log('[PdfGenerator] Module loaded with static imports');
 
 
 // A4 dimensions in points
@@ -136,20 +135,20 @@ export async function generatePdf(
 ): Promise<GeneratedPdf> {
   const opts = { ...DEFAULT_PDF_OPTIONS, ...options };
 
-  console.log('[PdfGenerator] Starting PDF generation for:', post.id);
+
 
   // Create PDF document
-  console.log('[PdfGenerator] Creating PDF document...');
+
   const pdfDoc = await PDFDocument.create();
 
   // Register fontkit for custom font support
-  console.log('[PdfGenerator] Registering fontkit...');
+
   pdfDoc.registerFontkit(fontkit);
 
   // Load and embed fonts
   const chineseFontBytes = await loadChineseFont();
   const emojiFontBytes = await loadEmojiFont();
-  console.log(`[PdfGenerator] Loaded fonts - Chinese: ${chineseFontBytes.length} bytes, Emoji: ${emojiFontBytes.length} bytes`);
+
   const chineseFont = await pdfDoc.embedFont(chineseFontBytes);
   const emojiFont = await pdfDoc.embedFont(emojiFontBytes);
   const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -163,10 +162,10 @@ export async function generatePdf(
   pdfDoc.setCreationDate(new Date(post.captureTimestamp));
 
   // Download images
-  console.log(`[PdfGenerator] Downloading ${post.images.length} images...`);
+
   const downloadedImages = await downloadImages(post.images);
   const successfulImages = downloadedImages.filter((img) => img.success && img.bytes);
-  console.log(`[PdfGenerator] Successfully downloaded ${successfulImages.length}/${post.images.length} images`);
+
 
   // Create pages
   let currentPage = pdfDoc.addPage([A4_WIDTH, A4_HEIGHT]);
@@ -309,12 +308,7 @@ export async function generatePdf(
 
   const failedImageCount = downloadedImages.filter((img) => !img.success).length;
 
-  console.log('[PdfGenerator] PDF generated successfully:', {
-    pages: pageCount,
-    size: pdfBytes.length,
-    imagesIncluded: successfulImages.length,
-    failedImages: failedImageCount,
-  });
+
 
   return {
     capturedPostId: post.id,

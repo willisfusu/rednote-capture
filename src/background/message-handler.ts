@@ -2,7 +2,7 @@
  * Message Handler - Dispatches incoming messages to appropriate handlers
  */
 
-console.log('[MessageHandler] Module loading...');
+
 
 import type { Message, Response } from '../types/messages';
 import { ErrorCode, createErrorResponse } from '../types/errors';
@@ -39,7 +39,7 @@ export async function handleMessage(
 ): Promise<Response> {
   const { action, payload, requestId } = message;
 
-  console.log(`[MessageHandler] Received action: ${action}`, payload);
+
 
   try {
     switch (action) {

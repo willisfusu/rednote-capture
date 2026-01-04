@@ -13,10 +13,10 @@ import { signIn, signOut, getAuthState } from '../../services/google-auth';
  */
 export async function handleSignIn(requestId?: string): Promise<Response<AuthState>> {
   try {
-    console.log('[Auth] Starting sign in...');
+
     const authState = await signIn();
 
-    console.log('[Auth] Sign in successful:', authState.userEmail);
+
 
     return {
       success: true,
@@ -49,10 +49,10 @@ export async function handleSignIn(requestId?: string): Promise<Response<AuthSta
  */
 export async function handleSignOut(requestId?: string): Promise<Response<void>> {
   try {
-    console.log('[Auth] Signing out...');
+
     await signOut();
 
-    console.log('[Auth] Sign out successful');
+
 
     return {
       success: true,

@@ -94,11 +94,11 @@ async function sendMessage<T>(action: string, payload?: unknown): Promise<Respon
     requestId: crypto.randomUUID(),
   };
 
-  console.log('[Popup] Sending message:', action, message);
+
 
   return new Promise((resolve) => {
     chrome.runtime.sendMessage(message, (response: Response<T>) => {
-      console.log('[Popup] Received response for', action, ':', response);
+
       if (chrome.runtime.lastError) {
         console.error('[Popup] Runtime error:', chrome.runtime.lastError);
       }
@@ -265,14 +265,14 @@ function clearError(): void {
 // Event Handlers
 
 async function handleCapture(): Promise<void> {
-  console.log('[Popup] handleCapture called');
+
   setLoading(true, 'Capturing post...');
 
   const response = await sendMessage<CapturedPost>('CAPTURE_POST');
-  console.log('[Popup] CAPTURE_POST response:', response);
+
 
   if (response.success && response.data) {
-    console.log('[Popup] Capture successful:', response.data.title);
+
     state.currentCapture = response.data;
     state.isLoading = false;
     updateUI();
@@ -428,7 +428,7 @@ async function init(): Promise<void> {
     state.currentCapture = sessionData.currentCapture;
   }
   if (sessionData.currentPdfMeta) {
-    console.log('[Popup] PDF metadata found but PDF data not persisted. User may need to regenerate.');
+
   }
 
   // Bind event listeners
@@ -450,7 +450,7 @@ async function init(): Promise<void> {
     };
 
     batchView.onProcess = async (ids, merge) => {
-      console.log('Process batch:', ids, 'Merge:', merge);
+
 
       const notesToProcess = state.detectedNotes.filter(n => ids.includes(n.noteId))
         .map(n => ({ noteId: n.noteId, noteUrl: n.noteUrl }));

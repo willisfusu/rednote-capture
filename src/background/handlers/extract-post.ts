@@ -17,7 +17,7 @@ export async function handleExtractPost(
   requestId?: string
 ): Promise<Response<CapturedPost>> {
   try {
-    console.log('[ExtractPost] Starting extraction...');
+
 
     let tabId: number | undefined;
 
@@ -34,7 +34,7 @@ export async function handleExtractPost(
       tab = activeTab;
     }
 
-    console.log('[ExtractPost] Target tab:', tab?.id, tab?.url);
+
 
     if (!tab?.id || !tab.url) {
       console.error('[ExtractPost] No valid tab found');
@@ -54,7 +54,7 @@ export async function handleExtractPost(
       );
     }
 
-    console.log('[ExtractPost] Injecting extraction script into tab:', tab.id);
+
 
     // Inject the extractor function and execute it
     const results = await chrome.scripting.executeScript({
@@ -63,7 +63,7 @@ export async function handleExtractPost(
       world: 'MAIN', // Access page's window object
     });
 
-    console.log('[ExtractPost] Script execution results:', results);
+
 
     if (!results || results.length === 0) {
       console.error('[ExtractPost] No results from script execution');
@@ -75,7 +75,7 @@ export async function handleExtractPost(
     }
 
     const extractedData = results[0].result as CapturedPost | null;
-    console.log('[ExtractPost] Extracted data:', extractedData);
+
 
     if (!extractedData) {
       console.error('[ExtractPost] Extracted data is null');
@@ -86,7 +86,7 @@ export async function handleExtractPost(
       );
     }
 
-    console.log('[ExtractPost] Successfully extracted post:', extractedData.title);
+
     return {
       success: true,
       data: extractedData,
@@ -108,52 +108,44 @@ export async function handleExtractPost(
  */
 function extractPostFromPage(): unknown {
   try {
-    console.log('[Extractor] Starting extraction from page...');
+
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const state = (window as any).__INITIAL_STATE__;
-    console.log('[Extractor] __INITIAL_STATE__ exists:', !!state);
+
 
     if (!state?.note?.noteDetailMap) {
       console.error('[Extractor] __INITIAL_STATE__ not found or invalid');
-      console.log('[Extractor] state:', state);
-      console.log('[Extractor] state.note:', state?.note);
+
       return null;
     }
 
     const { noteDetailMap, currentNoteId } = state.note;
     const noteIds = Object.keys(noteDetailMap);
-    console.log('[Extractor] Note IDs found:', noteIds);
-    console.log('[Extractor] Current note ID:', currentNoteId);
+
 
     // Get the note data
     let noteData = null;
-    let usedNoteId = null;
     if (currentNoteId && noteDetailMap[currentNoteId]?.note) {
       noteData = noteDetailMap[currentNoteId].note;
-      usedNoteId = currentNoteId;
     } else {
       if (noteIds.length > 0) {
         // Filter out 'undefined' key
         const validNoteIds = noteIds.filter(id => id !== 'undefined');
         if (validNoteIds.length > 0) {
           noteData = noteDetailMap[validNoteIds[0]]?.note;
-          usedNoteId = validNoteIds[0];
         }
       }
     }
 
-    console.log('[Extractor] Using note ID:', usedNoteId);
-    console.log('[Extractor] Note data exists:', !!noteData);
+
 
     if (!noteData) {
       console.error('[Extractor] No note data found');
       return null;
     }
 
-    console.log('[Extractor] Note title:', noteData.title);
-    console.log('[Extractor] Note author:', noteData.user?.nickname);
-    console.log('[Extractor] Image count:', noteData.imageList?.length);
+
 
     // Extract images
     const images = (noteData.imageList || [])
@@ -198,11 +190,11 @@ function extractPostFromPage(): unknown {
       status: 'captured',
     };
 
-    console.log('[Extractor] Created result object:', result.title, 'images:', result.images.length);
+
 
     // Convert to plain JSON to break Vue reactive proxy chain
     const finalResult = JSON.parse(JSON.stringify(result));
-    console.log('[Extractor] Final result after JSON conversion:', finalResult.title);
+
 
     return finalResult;
   } catch (error) {

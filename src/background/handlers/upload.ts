@@ -89,7 +89,7 @@ export async function handleUploadToDrive(
     // Create upload record
     let uploadRecord = createUploadRecord(generatedPdf.capturedPostId, generatedPdf.filename);
 
-    console.log('[Upload] Starting upload:', uploadRecord.id);
+
 
     // Convert base64 to blob
     const pdfBytes = base64ToUint8Array(generatedPdf.pdfBase64);
@@ -129,7 +129,7 @@ export async function handleUploadToDrive(
       );
     }
 
-    console.log('[Upload] Upload successful:', result.webViewLink);
+
 
     return {
       success: true,
