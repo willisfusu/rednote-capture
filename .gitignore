@@ -46,3 +46,8 @@ extension-key.pem
 
 # Fonts (large files - consider LFS or manual download)
 # src/lib/fonts/*.ttf
+
+# Specs and AI tooling
+specs/
+.claude/
+.specify/
